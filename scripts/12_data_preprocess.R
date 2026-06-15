@@ -2,46 +2,41 @@
 
 # __ Harmonize team names ______________________________________________________
 team_codes <- c(
-  "AS Monaco" = "ASM",
-  "ASVEL" = "ASV",
-  "BCM Gravelines" = "BCM",
-  "BCM Gravelines-Dunkerque" = "BCM",
+  "JL Bourg" = "BEB",
   "Blois" = "BLO",
   "Boulazac Dordogne" = "BOU",
   "Champagne Châlons Reims" = "CHR",
   "Cholet" = "CHO",
   "Cholet Basket" = "CHO",
-  "Chorale Roanne Basket" = "ROA",
-  "ÉB Pau-Lacq-Orthez" = "PLO",
   "Élan Chalon" = "CSS",
   "Élan Sportif Chalonnais" = "CSS",
-  "ESSM Le Portel" = "LPO",
-  "ESPE Basket Châlons-en-Champagne" = "CHR",
+  "JDA Dijon" = "DIJ",               
+  "Jeanne d'Arc Dijon Basket" = "DIJ",
   "Fos Provence Basket" = "FOS",
-  "JDA Dijon" = "JDA",               
-  "Jeanne d'Arc Dijon Basket" = "JDA",
-  "JL Bourg" = "BEB",
-  "LDLC ASVEL" = "ASV",
-  "Le Mans Sarthe" = "LMS",
-  "Le Mans Sarthe Basket" = "LMS",
+  "BCM Gravelines" = "GRA",
+  "BCM Gravelines-Dunkerque" = "GRA",
+  "Le Mans Sarthe" = "LEM",
+  "Le Mans Sarthe Basket" = "LEM",
+  "ESSM Le Portel" = "LEP",
+  "Metropolitans 92" = "LEV",
   "Limoges CSP" = "LIM",
-  "Metropolitans 92" = "M92",
+  "ASVEL" = "LYO",
+  "LDLC ASVEL" = "LYO",
+  "AS Monaco" = "MON",
   "Nancy" = "NCY",
+  "SLUC Nancy Basket" = "NCY",
   "Nanterre 92" = "NTR",
   "Orléans Loiret" = "ORL",
   "Paris Basketball" = "PAR",
+  "ÉB Pau-Lacq-Orthez" = "PAU",
   "Roanne" = "ROA",
+  "Chorale Roanne Basket" = "ROA",
+  "Stade Rochelais" = "ROC",
   "Saint-Quentin Basketball" = "SQT",
   "SIG Strasbourg" = "STR",
-  "SLUC Nancy Basket" = "NCY",
-  "Stade Rochelais" = "ROC",
   "xSIG Strasbourg" = "STR"
 )
 all_teams <- unique(unlist(team_codes))
-teams26 <- c(
-  "PAR", "ASM", "NTR", "ASV", "CHO", "LMS", "BEB", "STR",
-  "CSS", "NCY", "DIJ", "BOU", "LIM", "BCM", "SQT", "LPO"
-)
 
 # __ Preprocess data ___________________________________________________________
 clean_games <- function(df, phase, season) {
@@ -136,3 +131,30 @@ games <- bind_rows(
 # __ Set up random framework ___________________________________________________
 N <- 10000
 Seed <- 1807
+
+mon2par <- games |>
+  filter(
+    season %in% c("24", "25"),
+    team_home %in% c("PAR", "MON") & team_away %in% c("PAR", "MON")
+  )
+
+# games |> 
+#   filter(season == "26", !playoff) |>
+#   group_by(team_home) |>
+#   summarise(wins = sum(score_diff > 0)) |>
+#   arrange(desc(wins))
+# games |> 
+#   filter(season == "26", !playoff) |>
+#   group_by(team_away) |>
+#   summarise(wins = sum(score_diff < 0)) |>
+#   arrange(desc(wins))
+# games |>
+#   filter(season == "26", !playoff) |>
+#   mutate(winner = ifelse(score_diff > 0, team_home, team_away)) |>
+#   count(winner, name = "wins") |>
+#   arrange(desc(wins))
+# 
+# games |>
+#   filter(season == "26", !playoff) |>
+#   filter(team_home == "MON" | team_away == "MON") |>
+#   summarise(n_games = n())

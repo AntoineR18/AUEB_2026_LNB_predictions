@@ -16,9 +16,7 @@ source("scripts/11_data_load.R")
 source("scripts/12_data_preprocess.R")
 
 # __ Predictions _______________________________________________________________
-# source("scripts/31_SF_predictions.R")
-# source("scripts/32_SF_predictions_with_update.R")
-source("scripts/40_Final_pred_with_update.R")
+source("scripts/20_final_predictions.R")
 
 # __ Validation ________________________________________________________________
 source("scripts/50_validation.R")
