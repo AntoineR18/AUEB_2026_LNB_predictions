@@ -403,6 +403,35 @@ mean_points <- function (train) {
 mean_points(games26)
 mean_points(games2526)
 
+series_summary_bg0 <- as.data.frame(bind_rows(
+  final26$summary_serie,
+  final2526$summary_serie,
+  final26_history$summary_serie
+)) |>
+  mutate(Train_data = c("25-26", "24-25 & 25-26", "25-26 & history")) |>
+  select(
+    Train_data, P_A_wins, P_B_wins, P_A_wins_after3, P_B_wins_after3,P_5games
+  )
+
+show_outputs <- function () {
+  
+  cat("=== Series summaries before game 1 ===\n\n")
+  print(series_summary_bg0)
+  
+  cat("\n=== Games summaries before game 1 ===\n\n")
+  
+  cat("--- Train data: 25-26 season\n")
+  print(as.data.frame(final26$summary_games))
+  
+  cat("\n--- Train data: 24-25 & 25-26 seasons\n")
+  print(as.data.frame(final2526$summary_games))
+  
+  cat("\n--- Train data: 26 season & history ---\n")
+  print(as.data.frame(final26_history$summary_games))
+  
+}
+show_outputs()
+
 # __ Export outputs ____________________________________________________________
 export_outputs <- function () {
   
