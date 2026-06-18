@@ -249,13 +249,11 @@ plot_tree <- function(
     p_states
   )
   
-  pattern <- if (from_game <= 1) {
-    paste0("^G([1-9])|^0-0")
-  } else {
-    paste0("^G([", from_game, "-9])")
-  }
-  keep_nodes <- p_states$node[grepl(pattern, p_states$node)]
-  
+  keep_nodes <- p_states$node[
+    p_states$node == "0-0" |
+      grepl("^G", p_states$node)
+  ]
+    
   p_states  <- p_states  |> filter(node %in% keep_nodes)
   trans_prob <- trans_prob |> filter(from %in% keep_nodes, to %in% keep_nodes)
   
@@ -385,6 +383,23 @@ tree2526_after1 <- plot_tree(
   from_game = 1
 )
 
+sim2526_after2 <- simulate_bo5(
+  train = X_train2526, model = fit2526, teams = teams2526,
+  known_results = c(+4, -12)
+)
+final2526_after2 <- summarise_bo5(sim2526_after2, known_results = c(+4, -12))
+tree2526_after2 <- plot_tree(
+  all_states = sim2526_after2$states,
+  all_wins = sim2526_after2$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: after game 2",
+    "\n",
+    "Model: trained on seasons 25 and 26"
+  ),
+  from_game = 2
+)
+
 # __ Show outputs ______________________________________________________________
 mean_points <- function (train) {
   mean_points <- left_join(
@@ -430,19 +445,19 @@ show_outputs <- function () {
   print(as.data.frame(final26_history$summary_games))
   
 }
-show_outputs()
+# show_outputs()
 
 # __ Export outputs ____________________________________________________________
 export_outputs <- function () {
   
   write_csv(
-    final2526_after1$summary_games,
-    file = "outputs/after_g1/final2526_after1_games.csv"
+    final2526_after2$summary_games,
+    file = "outputs/after_g2/final2526_after2_games.csv"
   )
   
   write_csv(
-    final2526_after1$summary_serie,
-    file = "outputs/after_g1/final2526_after1_series.csv"
+    final2526_after2$summary_serie,
+    file = "outputs/after_g2/final2526_after2_series.csv"
   )
   
   # print(
@@ -455,8 +470,8 @@ export_outputs <- function () {
   # )
   
   ggsave(
-    filename = "outputs/after_g1/final2526_after1_tree.png",
-    plot = tree2526_after1,
+    filename = "outputs/after_g2/final2526_after2_tree.png",
+    plot = tree2526_after2,
     width = 10,
     height = 6
   )
