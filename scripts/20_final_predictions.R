@@ -316,88 +316,108 @@ plot_tree <- function(
 }
 
 # __ Predictions with 26 _______________________________________________________
-sim26 <- simulate_bo5(
-  train = X_train26, model = fit26, teams = teams26
-)
-final26 <- summarise_bo5(sim26)
-tree26 <- plot_tree(
-  all_states = sim26$states,
-  all_wins = sim26$wins,
-  title = "Probability tree of the possible outcomes",
-  caption = paste0(
-    "Stage of the series: before the first game",
-    "\n",
-    "Model: trained on seasons 26"
-  ),
-  from_game = 0
-)
+# sim26 <- simulate_bo5(
+#   train = X_train26, model = fit26, teams = teams26
+# )
+# final26 <- summarise_bo5(sim26)
+# tree26 <- plot_tree(
+#   all_states = sim26$states,
+#   all_wins = sim26$wins,
+#   title = "Probability tree of the possible outcomes",
+#   caption = paste0(
+#     "Stage of the series: before the first game",
+#     "\n",
+#     "Model: trained on seasons 26"
+#   ),
+#   from_game = 0
+# )
 
 # __ Predictions with 26 & history _____________________________________________
-sim26_history <- simulate_bo5(
-  train = X_train26_history, model = fit26_history, teams = teams26
-)
-final26_history <- summarise_bo5(sim26_history)
-tree26_history <- plot_tree(
-  all_states = sim26_history$states,
-  all_wins = sim26_history$wins,
-  title = "Probability tree of the possible outcomes",
-  caption = paste0(
-    "Stage of the series: before the first game",
-    "\n",
-    "Model: trained on season 26 with games between MON and PAR since 24"
-  ),
-  from_game = 0
-)
+# sim26_history <- simulate_bo5(
+#   train = X_train26_history, model = fit26_history, teams = teams26
+# )
+# final26_history <- summarise_bo5(sim26_history)
+# tree26_history <- plot_tree(
+#   all_states = sim26_history$states,
+#   all_wins = sim26_history$wins,
+#   title = "Probability tree of the possible outcomes",
+#   caption = paste0(
+#     "Stage of the series: before the first game",
+#     "\n",
+#     "Model: trained on season 26 with games between MON and PAR since 24"
+#   ),
+#   from_game = 0
+# )
 
 # __ Predictions with 25 & 26 __________________________________________________
-sim2526 <- simulate_bo5(
-  train = X_train2526, model = fit2526, teams = teams2526
-)
-final2526 <- summarise_bo5(sim2526)
-tree2526 <- plot_tree(
-  all_states = sim2526$states,
-  all_wins = sim2526$wins,
-  title = "Probability tree of the possible outcomes",
-  caption = paste0(
-    "Stage of the series: before the first game",
-    "\n",
-    "Model: trained on seasons 25 and 26"
-  ),
-  from_game = 0
-)
+# sim2526 <- simulate_bo5(
+#   train = X_train2526, model = fit2526, teams = teams2526
+# )
+# final2526 <- summarise_bo5(sim2526)
+# tree2526 <- plot_tree(
+#   all_states = sim2526$states,
+#   all_wins = sim2526$wins,
+#   title = "Probability tree of the possible outcomes",
+#   caption = paste0(
+#     "Stage of the series: before the first game",
+#     "\n",
+#     "Model: trained on seasons 25 and 26"
+#   ),
+#   from_game = 0
+# )
 
-sim2526_after1 <- simulate_bo5(
-  train = X_train2526, model = fit2526, teams = teams2526,
-  known_results = c(+4)
-)
-final2526_after1 <- summarise_bo5(sim2526_after1, known_results = c(+4))
-tree2526_after1 <- plot_tree(
-  all_states = sim2526_after1$states,
-  all_wins = sim2526_after1$wins,
-  title = "Probability tree of the possible outcomes",
-  caption = paste0(
-    "Stage of the series: after game 1",
-    "\n",
-    "Model: trained on seasons 25 and 26"
-  ),
-  from_game = 1
-)
+# sim2526_after1 <- simulate_bo5(
+#   train = X_train2526, model = fit2526, teams = teams2526,
+#   known_results = c(+4)
+# )
+# final2526_after1 <- summarise_bo5(sim2526_after1, known_results = c(+4))
+# tree2526_after1 <- plot_tree(
+#   all_states = sim2526_after1$states,
+#   all_wins = sim2526_after1$wins,
+#   title = "Probability tree of the possible outcomes",
+#   caption = paste0(
+#     "Stage of the series: after game 1",
+#     "\n",
+#     "Model: trained on seasons 25 and 26"
+#   ),
+#   from_game = 1
+# )
 
-sim2526_after2 <- simulate_bo5(
+# sim2526_after2 <- simulate_bo5(
+#   train = X_train2526, model = fit2526, teams = teams2526,
+#   known_results = c(+4, -12)
+# )
+# final2526_after2 <- summarise_bo5(sim2526_after2, known_results = c(+4, -12))
+# tree2526_after2 <- plot_tree(
+#   all_states = sim2526_after2$states,
+#   all_wins = sim2526_after2$wins,
+#   title = "Probability tree of the possible outcomes",
+#   caption = paste0(
+#     "Stage of the series: after game 2",
+#     "\n",
+#     "Model: trained on seasons 25 and 26"
+#   ),
+#   from_game = 2
+# )
+
+sim2526_after3 <- simulate_bo5(
   train = X_train2526, model = fit2526, teams = teams2526,
-  known_results = c(+4, -12)
+  known_results = c(+4, -12, -11)
 )
-final2526_after2 <- summarise_bo5(sim2526_after2, known_results = c(+4, -12))
-tree2526_after2 <- plot_tree(
-  all_states = sim2526_after2$states,
-  all_wins = sim2526_after2$wins,
+final2526_after3 <- summarise_bo5(
+  sim2526_after3,
+  known_results = c(+4, -12, -11)
+)
+tree2526_after3 <- plot_tree(
+  all_states = sim2526_after3$states,
+  all_wins = sim2526_after3$wins,
   title = "Probability tree of the possible outcomes",
   caption = paste0(
-    "Stage of the series: after game 2",
+    "Stage of the series: after game 3",
     "\n",
     "Model: trained on seasons 25 and 26"
   ),
-  from_game = 2
+  from_game = 3
 )
 
 # __ Show outputs ______________________________________________________________
@@ -451,13 +471,13 @@ show_outputs <- function () {
 export_outputs <- function () {
   
   write_csv(
-    final2526_after2$summary_games,
-    file = "outputs/after_g2/final2526_after2_games.csv"
+    final2526_after3$summary_games,
+    file = "outputs/after_g3/final2526_after3_games.csv"
   )
   
   write_csv(
-    final2526_after2$summary_serie,
-    file = "outputs/after_g2/final2526_after2_series.csv"
+    final2526_after3$summary_serie,
+    file = "outputs/after_g3/final2526_after3_series.csv"
   )
   
   # print(
@@ -470,8 +490,8 @@ export_outputs <- function () {
   # )
   
   ggsave(
-    filename = "outputs/after_g2/final2526_after2_tree.png",
-    plot = tree2526_after2,
+    filename = "outputs/after_g3/final2526_after3_tree.png",
+    plot = tree2526_after3,
     width = 10,
     height = 6
   )
