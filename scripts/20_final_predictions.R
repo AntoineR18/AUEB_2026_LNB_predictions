@@ -420,6 +420,26 @@ tree2526_after3 <- plot_tree(
   from_game = 3
 )
 
+sim2526_after4 <- simulate_bo5(
+  train = X_train2526, model = fit2526, teams = teams2526,
+  known_results = c(+4, -12, -11, +12)
+)
+final2526_after4 <- summarise_bo5(
+  sim2526_after4,
+  known_results = c(+4, -12, -11, +12)
+)
+tree2526_after4 <- plot_tree(
+  all_states = sim2526_after4$states,
+  all_wins = sim2526_after4$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: after game 4",
+    "\n",
+    "Model: trained on seasons 25 and 26"
+  ),
+  from_game = 4
+)
+
 # __ Show outputs ______________________________________________________________
 mean_points <- function (train) {
   mean_points <- left_join(
@@ -471,14 +491,14 @@ show_outputs <- function () {
 export_outputs <- function () {
   
   write_csv(
-    final2526_after3$summary_games,
-    file = "outputs/after_g3/final2526_after3_games.csv"
+    final2526_after4$summary_games,
+    file = "outputs/after_g4/final2526_after4_games.csv"
   )
   
-  write_csv(
-    final2526_after3$summary_serie,
-    file = "outputs/after_g3/final2526_after3_series.csv"
-  )
+  # write_csv(
+  #   final2526_after3$summary_serie,
+  #   file = "outputs/after_g3/final2526_after3_series.csv"
+  # )
   
   # print(
   #   xtable(
@@ -490,8 +510,8 @@ export_outputs <- function () {
   # )
   
   ggsave(
-    filename = "outputs/after_g3/final2526_after3_tree.png",
-    plot = tree2526_after3,
+    filename = "outputs/after_g4/final2526_after4_tree.png",
+    plot = tree2526_after4,
     width = 10,
     height = 6
   )
