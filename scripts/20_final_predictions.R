@@ -23,7 +23,9 @@ make_design <- function(data, teams, ref = "PAR") {
   cbind(home = 1, as.data.frame(X))
 }
 
-games26 <- games |> filter(season == "26")
+games26 <- games |>
+  filter(season == "26") |>
+  head(-5)
 teams26 <- unique(games26 |> pull(team_home))
 X_train26 <- cbind(
   make_design(data = games26, teams = teams26),
@@ -36,7 +38,9 @@ X_train26_history <- cbind(
   score_diff = games26_history$score_diff
 )
 
-games2526 <- games |> filter(season >= "25")
+games2526 <- games |>
+  filter(season >= "25") |>
+  head(-5)
 teams2526 <- unique(games2526 |> pull(team_home))
 X_train2526 <- cbind(
   make_design(data = games2526, teams = teams2526),
@@ -179,13 +183,24 @@ summarise_bo5 <- function(
     Team_B = team_B,
     P_A_wins = round(mean(sapply(all_wins, function(g) g[1] == 3)), 3),
     P_B_wins = round(mean(sapply(all_wins, function(g) g[2] == 3)), 3),
-    P_A_wins_after3 = round(mean(sapply(
+    P_A_30_B = round(mean(sapply(
       all_wins, function(g) g[1] == 3 & sum(g) == 3
     )), 3),
-    P_B_wins_after3 = round(mean(sapply(
-      all_wins, function(g) g[2] == 3 & sum(g) == 3
+    P_A_31_B = round(mean(sapply(
+      all_wins, function(g) g[1] == 3 & sum(g) == 4
     )), 3),
-    P_5games = round(mean(sapply(all_wins, function(g) sum(g) == 5)), 3)
+    P_A_32_B = round(mean(sapply(
+      all_wins, function(g) g[1] == 3 & sum(g) == 5
+    )), 3),
+    P_A_23_B = round(mean(sapply(
+      all_wins, function(g) g[1] != 3 & sum(g) == 5
+    )), 3),
+    P_A_13_B = round(mean(sapply(
+      all_wins, function(g) g[1] != 3 & sum(g) == 4
+    )), 3),
+    P_A_03_B = round(mean(sapply(
+      all_wins, function(g) g[2] == 3 & sum(g) == 3
+    )), 3)
   )
   
   return(list(
@@ -315,90 +330,178 @@ plot_tree <- function(
     )
 }
 
-# __ Predictions with 26 _______________________________________________________
-# sim26 <- simulate_bo5(
-#   train = X_train26, model = fit26, teams = teams26
-# )
-# final26 <- summarise_bo5(sim26)
-# tree26 <- plot_tree(
-#   all_states = sim26$states,
-#   all_wins = sim26$wins,
-#   title = "Probability tree of the possible outcomes",
-#   caption = paste0(
-#     "Stage of the series: before the first game",
-#     "\n",
-#     "Model: trained on seasons 26"
-#   ),
-#   from_game = 0
-# )
+# __ Initial predictions _______________________________________________________
 
-# __ Predictions with 26 & history _____________________________________________
-# sim26_history <- simulate_bo5(
-#   train = X_train26_history, model = fit26_history, teams = teams26
-# )
-# final26_history <- summarise_bo5(sim26_history)
-# tree26_history <- plot_tree(
-#   all_states = sim26_history$states,
-#   all_wins = sim26_history$wins,
-#   title = "Probability tree of the possible outcomes",
-#   caption = paste0(
-#     "Stage of the series: before the first game",
-#     "\n",
-#     "Model: trained on season 26 with games between MON and PAR since 24"
-#   ),
-#   from_game = 0
-# )
+ # Predictions with 26
+sim26 <- simulate_bo5(
+  train = X_train26, model = fit26, teams = teams26
+)
+final26 <- summarise_bo5(sim26)
+tree26 <- plot_tree(
+  all_states = sim26$states,
+  all_wins = sim26$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: before the first game",
+    "\n",
+    "Model: trained on seasons 26"
+  ),
+  from_game = 0
+)
+
+ # Predictions with 26 & history
+sim26_history <- simulate_bo5(
+  train = X_train26_history, model = fit26_history, teams = teams26
+)
+final26_history <- summarise_bo5(sim26_history)
+tree26_history <- plot_tree(
+  all_states = sim26_history$states,
+  all_wins = sim26_history$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: before the first game",
+    "\n",
+    "Model: trained on season 26 with games between MON and PAR since 24"
+  ),
+  from_game = 0
+)
+
+ # Predictions with 25 & 26
+sim2526 <- simulate_bo5(
+  train = X_train2526, model = fit2526, teams = teams2526
+)
+final2526 <- summarise_bo5(sim2526)
+tree2526 <- plot_tree(
+  all_states = sim2526$states,
+  all_wins = sim2526$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: before the first game",
+    "\n",
+    "Model: trained on seasons 25 and 26"
+  ),
+  from_game = 0
+)
+
+ # Predictions comparisons
+series_summary_bg0 <- as.data.frame(bind_rows(
+  final26$summary_serie,
+  final2526$summary_serie,
+  final26_history$summary_serie
+)) |>
+  mutate(Train_data = c("25-26", "24-25 & 25-26", "25-26 & history")) |>
+  select(Train_data, P_A_wins, P_B_wins)
+
+series_summary_bg0_details <- as.data.frame(bind_rows(
+  final26$summary_serie,
+  final2526$summary_serie,
+  final26_history$summary_serie
+))
+means_row <- series_summary_bg0_details |>
+  summarise(across(where(is.numeric), ~ round(mean(.x), 3)))
+series_summary_bg0_details <- series_summary_bg0_details |>
+  bind_rows(means_row) |>
+  mutate(Train_data = c("25-26", "24-25 & 25-26", "25-26 & history", "Mean")) |>
+  select(Train_data, everything(), -Team_A, -Team_B, -P_A_wins, -P_B_wins)
+
+ # Show comparisons
+extract_outcomes <- function(summary_serie, label) {
+  summary_serie |>
+    select(P_A_30_B, P_A_31_B, P_A_32_B, P_A_23_B, P_A_13_B, P_A_03_B) |>
+    pivot_longer(everything(), names_to = "Outcome", values_to = "Prob") |>
+    mutate(
+      Outcome = recode(
+        Outcome,
+        P_A_30_B = "3-0", P_A_31_B = "3-1", P_A_32_B = "3-2",
+        P_A_23_B = "2-3", P_A_13_B = "1-3", P_A_03_B = "0-3"
+      ),
+      Train_data = label
+    )
+}
+
+outcomes <- bind_rows(
+  extract_outcomes(final26$summary_serie,         "25-26"),
+  extract_outcomes(final2526$summary_serie,        "24-25 & 25-26"),
+  extract_outcomes(final26_history$summary_serie,  "25-26 & history")
+) |>
+  mutate(
+    Train_data = factor(
+      Train_data,
+      levels = c("25-26 & history", "24-25 & 25-26", "25-26")
+    ),
+    Outcome = factor(
+      Outcome,
+      levels = c("0-3", "1-3", "2-3", "3-2", "3-1", "3-0")
+    )
+  )
+
+series_summary_bg0_plot <- ggplot(
+  outcomes, 
+  aes(x = Train_data, y = Prob, fill = Outcome)
+) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "3-0" = "#E2001A",
+      "3-1" = "#F26B6B",
+      "3-2" = "#F9BABA",
+      "2-3" = "#BAD4C2",
+      "1-3" = "#6BA88A",
+      "0-3" = "#007A33"
+    )
+  ) +
+  labs(
+    title = "Predicted outcome probabilities by model",
+    x = "Train data",
+    y = "Probability",
+    fill = "Outcome (PAR - MON)"
+  ) +
+  theme_minimal() +
+  coord_flip() +
+  guides(fill = guide_legend(reverse = TRUE))
+
+ggsave(
+  filename = "outputs/before_g0/series_summary_bg0_plot.png",
+  plot = series_summary_bg0_plot,
+  width = 8,
+  height = 2
+)
 
 # __ Predictions with 25 & 26 __________________________________________________
-# sim2526 <- simulate_bo5(
-#   train = X_train2526, model = fit2526, teams = teams2526
-# )
-# final2526 <- summarise_bo5(sim2526)
-# tree2526 <- plot_tree(
-#   all_states = sim2526$states,
-#   all_wins = sim2526$wins,
-#   title = "Probability tree of the possible outcomes",
-#   caption = paste0(
-#     "Stage of the series: before the first game",
-#     "\n",
-#     "Model: trained on seasons 25 and 26"
-#   ),
-#   from_game = 0
-# )
+sim2526_after1 <- simulate_bo5(
+  train = X_train2526, model = fit2526, teams = teams2526,
+  known_results = c(+4)
+)
+final2526_after1 <- summarise_bo5(sim2526_after1, known_results = c(+4))
+tree2526_after1 <- plot_tree(
+  all_states = sim2526_after1$states,
+  all_wins = sim2526_after1$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: after game 1",
+    "\n",
+    "Model: trained on seasons 25 and 26"
+  ),
+  from_game = 1
+)
 
-# sim2526_after1 <- simulate_bo5(
-#   train = X_train2526, model = fit2526, teams = teams2526,
-#   known_results = c(+4)
-# )
-# final2526_after1 <- summarise_bo5(sim2526_after1, known_results = c(+4))
-# tree2526_after1 <- plot_tree(
-#   all_states = sim2526_after1$states,
-#   all_wins = sim2526_after1$wins,
-#   title = "Probability tree of the possible outcomes",
-#   caption = paste0(
-#     "Stage of the series: after game 1",
-#     "\n",
-#     "Model: trained on seasons 25 and 26"
-#   ),
-#   from_game = 1
-# )
-
-# sim2526_after2 <- simulate_bo5(
-#   train = X_train2526, model = fit2526, teams = teams2526,
-#   known_results = c(+4, -12)
-# )
-# final2526_after2 <- summarise_bo5(sim2526_after2, known_results = c(+4, -12))
-# tree2526_after2 <- plot_tree(
-#   all_states = sim2526_after2$states,
-#   all_wins = sim2526_after2$wins,
-#   title = "Probability tree of the possible outcomes",
-#   caption = paste0(
-#     "Stage of the series: after game 2",
-#     "\n",
-#     "Model: trained on seasons 25 and 26"
-#   ),
-#   from_game = 2
-# )
+sim2526_after2 <- simulate_bo5(
+  train = X_train2526, model = fit2526, teams = teams2526,
+  known_results = c(+4, -12)
+)
+final2526_after2 <- summarise_bo5(sim2526_after2, known_results = c(+4, -12))
+tree2526_after2 <- plot_tree(
+  all_states = sim2526_after2$states,
+  all_wins = sim2526_after2$wins,
+  title = "Probability tree of the possible outcomes",
+  caption = paste0(
+    "Stage of the series: after game 2",
+    "\n",
+    "Model: trained on seasons 25 and 26"
+  ),
+  from_game = 2
+)
 
 sim2526_after3 <- simulate_bo5(
   train = X_train2526, model = fit2526, teams = teams2526,
@@ -440,7 +543,71 @@ tree2526_after4 <- plot_tree(
   from_game = 4
 )
 
-# __ Show outputs ______________________________________________________________
+# __ Series evolution __________________________________________________________
+extract_outcomes_evolution <- function(summary_serie, stage) {
+  summary_serie |>
+    select(P_A_30_B, P_A_31_B, P_A_32_B, P_A_23_B, P_A_13_B, P_A_03_B) |>
+    pivot_longer(everything(), names_to = "Outcome", values_to = "Prob") |>
+    mutate(
+      Outcome = recode(
+        Outcome,
+        P_A_30_B = "3-0", P_A_31_B = "3-1", P_A_32_B = "3-2",
+        P_A_23_B = "2-3", P_A_13_B = "1-3", P_A_03_B = "0-3"
+      ),
+      Stage = stage
+    )
+}
+
+outcomes_evolution <- bind_rows(
+  extract_outcomes_evolution(final2526$summary_serie,         "Before game 1"),
+  extract_outcomes_evolution(final2526_after1$summary_serie,  "After game 1"),
+  extract_outcomes_evolution(final2526_after2$summary_serie,  "After game 2"),
+  extract_outcomes_evolution(final2526_after3$summary_serie,  "After game 3"),
+  extract_outcomes_evolution(final2526_after4$summary_serie,  "After game 4")
+) |>
+  mutate(
+    Stage = factor(Stage, levels = c(
+      "After game 4", "After game 3", "After game 2", "After game 1", "Before game 1"
+    )),
+    Outcome = factor(
+      Outcome,
+      levels = c("0-3", "1-3", "2-3", "3-2", "3-1", "3-0")
+    )
+  )
+
+series_evolution_plot <- ggplot(
+  outcomes_evolution,
+  aes(x = Stage, y = Prob, fill = Outcome)
+) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "3-0" = "#E2001A",
+      "3-1" = "#F26B6B",
+      "3-2" = "#F9BABA",
+      "2-3" = "#BAD4C2",
+      "1-3" = "#6BA88A",
+      "0-3" = "#007A33"
+    )
+  ) +
+  labs(
+    title = "Evolution of outcome probabilities throughout the Finals",
+    x = "Stage of the series",
+    y = "Probability",
+    fill = "Outcome (PAR - MON)"
+  ) +
+  theme_minimal() +
+  coord_flip() +
+  guides(fill = guide_legend(reverse = TRUE))
+
+ggsave(
+  filename = "outputs/before_g0/series_evolution_plot.png",
+  plot = series_evolution_plot,
+  width = 8,
+  height = 2
+)
+
 mean_points <- function (train) {
   mean_points <- left_join(
     train |>
@@ -457,16 +624,6 @@ mean_points <- function (train) {
 }
 mean_points(games26)
 mean_points(games2526)
-
-series_summary_bg0 <- as.data.frame(bind_rows(
-  final26$summary_serie,
-  final2526$summary_serie,
-  final26_history$summary_serie
-)) |>
-  mutate(Train_data = c("25-26", "24-25 & 25-26", "25-26 & history")) |>
-  select(
-    Train_data, P_A_wins, P_B_wins, P_A_wins_after3, P_B_wins_after3,P_5games
-  )
 
 show_outputs <- function () {
   
@@ -512,8 +669,8 @@ export_outputs <- function () {
   ggsave(
     filename = "outputs/after_g4/final2526_after4_tree.png",
     plot = tree2526_after4,
-    width = 10,
-    height = 6
+    width = 8,
+    height = 5
   )
 }
 # export_outputs()
